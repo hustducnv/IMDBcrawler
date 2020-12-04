@@ -11,6 +11,7 @@ BOT_NAME = 'IMDB_Crawler'
 
 SPIDER_MODULES = ['IMDB_Crawler.spiders']
 NEWSPIDER_MODULE = 'IMDB_Crawler.spiders'
+LOG_LEVEL = 'INFO'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
