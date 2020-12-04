@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1bf2a354-765b-46f0-93c4-7559c5cbacf8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/IMDB_Crawler/items.py" beforeDir="false" afterPath="$PROJECT_DIR$/IMDB_Crawler/items.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/IMDB_Crawler/spiders/spyder.py" beforeDir="false" afterPath="$PROJECT_DIR$/IMDB_Crawler/spiders/spyder.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,6 +24,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
@@ -40,6 +43,10 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
+    <state x="155" y="93" width="1033" height="535" key="DiffContextDialog" timestamp="1607105089328">
+      <screen x="62" y="0" width="1218" height="720" />
+    </state>
+    <state x="155" y="93" width="1033" height="535" key="DiffContextDialog/62.0.1218.720@62.0.1218.720" timestamp="1607105089328" />
     <state x="173" y="4" key="SettingsEditor" timestamp="1607071920992">
       <screen x="62" y="0" width="1218" height="720" />
     </state>

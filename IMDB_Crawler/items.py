@@ -41,7 +41,7 @@ class MovieItem(Item):
 
     # Details
     title = Field(input_processor=MapCompose(clean_tilte), output_processor=TakeFirst())
-    title_feature = Field(output_processor=TakeFirst())
+    url = Field(output_processor=TakeFirst())
     imdb_rating = Field(output_processor=TakeFirst())
     rating_count = Field(input_processor=MapCompose(clean_rating_count), output_processor=TakeFirst())
     release_date = Field(input_processor=MapCompose(clean_input), output_processor=TakeFirst())

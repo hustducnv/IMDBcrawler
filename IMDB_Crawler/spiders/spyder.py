@@ -11,7 +11,8 @@ class IMDBspider(Spider):
     allowed_domains = ['imdb.com']
 
     def start_requests(self):
-        start_url = 'https://www.imdb.com/search/title/?title_type=feature&'
+        start_url = 'https://www.imdb.com/search/title/?year=1910&title_type=feature&'
+        # start_url = 'https://www.imdb.com/search/title/?title_type=feature&'
         yield Request(url=start_url, callback=self.parse_film_links)
 
         # test
