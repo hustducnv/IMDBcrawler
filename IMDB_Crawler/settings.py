@@ -12,7 +12,9 @@ BOT_NAME = 'IMDB_Crawler'
 SPIDER_MODULES = ['IMDB_Crawler.spiders']
 NEWSPIDER_MODULE = 'IMDB_Crawler.spiders'
 LOG_LEVEL = 'INFO'
-
+# FEED_EXPORTERS = {
+#     'json': 'IMDB_Crawler.exporters.Utf8JsonItemExporter',
+# }
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'IMDB_Crawler (+http://www.yourdomain.com)'

@@ -1,9 +1,9 @@
 from scrapy import Spider, Request
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import TakeFirst
+from scrapy import Selector
 
-from IMDB_Crawler.items import MovieItem
-
+from IMDB_Crawler.items import MovieItem, ReviewItem
 
 
 class IMDBspider(Spider):
@@ -11,14 +11,15 @@ class IMDBspider(Spider):
     allowed_domains = ['imdb.com']
 
     def start_requests(self):
-        start_url = 'https://www.imdb.com/search/title/?year=1910&title_type=feature&'
         # start_url = 'https://www.imdb.com/search/title/?title_type=feature&'
-        yield Request(url=start_url, callback=self.parse_film_links)
+        # yield Request(url=start_url, callback=self.parse_film_links)
 
         # test
         # start_url = 'https://www.imdb.com/title/tt0290677/?ref_=adv_li_tt'
         # start_url = 'https://www.imdb.com/title/tt4154796/?ref_=nv_sr_srsg_0'
-        # yield Request(url=start_url, callback=self.parse_film_features)
+        # start_url = 'https://www.imdb.com/title/tt4786824/?ref_=adv_li_tt'  # tv series
+        start_url = 'https://www.imdb.com/title/tt13341432/?ref_=adv_li_tt'  # tv movie
+        yield Request(url=start_url, callback=self.parse_film_features)
 
     def parse_film_links(self, response):
         film_links = response.xpath('//*[@id="main"]/div/div[3]/div/div/div[3]/h3/a')
@@ -58,5 +59,28 @@ class IMDBspider(Spider):
 
         yield l.load_item()
 
+
+class ReviewSpider(Spider):
+    name = 'ReviewSpider'
+    allowed_domains = ['imdb.com']
+
+    def start_requests(self):
+        base_url = 'https://www.imdb.com/title/tt10048342/reviews/_ajax?ref_=undefined&paginationKey='
+        pagination_key = 'g4wp7czmqy2dcyqk7stxhnryrxs4mazhzfmxvlnomwklyczuf43o6ss5oiyvxnbddz4k4iai23zw7hjnwz3rb5e47shxqca'
+        url = base_url + pagination_key
+        yield Request(url=url, callback=self.parse_review_container)
+
+    def parse_review_container(self, response, **kwargs):
+        rv_containers = response.xpath('/html/body/div[1]/div[1]/div')
+        xpath = '/html/body/div[1]/div[1]/div[{0}]/{1}'
+        for idx in range(1, len(rv_containers)+1):
+            l = ItemLoader(item=ReviewItem(), response=response)
+            l.add_xpath('user_id', xpath.format(idx, 'div[1]/div[1]/div[2]/span[1]/a/@href'))
+            l.add_xpath('comment_id', xpath.format(idx, 'div[1]/div[1]/a/@href'))
+            l.add_xpath('date', xpath.format(idx, 'div[1]/div[1]/div[2]/span[2]/text()'))
+            l.add_xpath('star_rating', xpath.format(idx, 'div[1]/div[1]/div[1]/span/span[1]/text()'))
+            l.add_xpath('title', xpath.format(idx, 'div[1]/div[1]/a/text()'))
+            l.add_xpath('content', xpath.format(idx, 'div[1]/div[1]/div[@class="content"]/div[1]/text()'))
+            yield l.load_item()
 
 

@@ -71,3 +71,22 @@ class MovieItem(Item):
     # Technical Specs
     runtime = Field(output_processor=TakeFirst())
     aspect_ratio = Field(input_processor=MapCompose(clean_input), output_processor=TakeFirst())
+
+
+def get_id(text):
+    # '/user/ur59804772/', '/review/rw6208113/'
+    try:
+        id = text.split('/')[-2]
+    except:
+        return None
+    return id
+
+
+class ReviewItem(Item):
+    user_id = Field(input_processor=MapCompose(get_id), output_processor=TakeFirst())
+    comment_id = Field(input_processor=MapCompose(get_id), output_processor=TakeFirst())
+    date = Field(output_processor=TakeFirst())
+    star_rating = Field(output_processor=TakeFirst())
+    title = Field(input_processor=MapCompose(clean_input), output_processor=TakeFirst())
+    content = Field(output_processor=TakeFirst())
+
