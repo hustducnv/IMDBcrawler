@@ -83,6 +83,7 @@ def get_id(text):
 
 
 class ReviewItem(Item):
+    film_id = Field(output_processor=TakeFirst())
     user_id = Field(input_processor=MapCompose(get_id), output_processor=TakeFirst())
     comment_id = Field(input_processor=MapCompose(get_id), output_processor=TakeFirst())
     date = Field(output_processor=TakeFirst())

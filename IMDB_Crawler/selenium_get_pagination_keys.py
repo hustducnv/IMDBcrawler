@@ -11,6 +11,7 @@ from pandas import read_csv, DataFrame
 from tqdm import tqdm
 import numpy as np
 import threading
+import concurrent.futures
 from configs import *
 
 
@@ -23,7 +24,7 @@ desired_capabilities = options.to_capabilities()
 BASE_URL = 'https://www.imdb.com/title/{}/reviews'
 
 
-def get_pagination_keys(url, multithreading_args=None):
+def get_pagination_keys(url, film_id=None):
     driver = webdriver.Chrome(PATH, desired_capabilities=desired_capabilities)
     driver.get(url)
     pagination_keys = set()
@@ -45,29 +46,14 @@ def get_pagination_keys(url, multithreading_args=None):
         driver.quit()
 
     pagination_keys = list(pagination_keys)
-    if multithreading_args is not None:
-        film_id, film_id_col, key_list_col, lock = multithreading_args
-        # print(film_id)
-        lock.acquire()
-        film_id_col.append(film_id)
-        key_list_col.append(pagination_keys)
-        lock.release()
+    print('#'*50)
+    print('url: {} DONE'.format(url))
+    print('got {} keys'.format(len(pagination_keys)))
+    if film_id is not None:
+        return pagination_keys, film_id  # return film_id for multi-threading
     return pagination_keys
 
 
-def multithreadings_get_pkeys(film_ids, film_id_col, key_list_col):
-    threads = []
-    for film_id in film_ids:
-        lock = threading.Lock()
-        _thread = threading.Thread(target=get_pagination_keys, args=(BASE_URL.format(film_id), (film_id, film_id_col, key_list_col, lock)))
-        _thread.start()
-        threads.append(_thread)
-
-    for _thread in threads:
-        _thread.join()
-
-
-# if __name__ == '__main__':
 def run():
     film_ids = read_csv(
         os.path.join(CORE_DATA_DIR, 'id2020.csv'),
@@ -78,24 +64,26 @@ def run():
     key_list_col = []
     film_id_col = []
     start, end = SeleniumConfig.START_IDX, SeleniumConfig.END_IDX
+    film_ids = film_ids[start:end]
     n_threads = SeleniumConfig.N_THREADS
 
     print('#' * 50)
     print('N_THREADS = ', n_threads)
     if n_threads == 1:
-        for film_id in tqdm(film_ids[start:end]):
+        for film_id in tqdm(film_ids):
             keys = get_pagination_keys(BASE_URL.format(film_id))
             film_id_col.append(film_id)
             key_list_col.append(keys)
     else:
-        n_ids = len(film_ids[start:end])
-        for i in tqdm(range(int(np.ceil(n_ids / n_threads)))):
-            start_idx = i * n_threads
-            end_idx = start_idx + n_threads
-            if end_idx > n_ids:
-                end_idx = n_ids
-            multithreadings_get_pkeys(film_ids[start_idx:end_idx], film_id_col, key_list_col)
-    # print(film_id_col)
-    df = DataFrame({'film_id': film_id_col, 'keys': key_list_col})
+        with concurrent.futures.ThreadPoolExecutor(max_workers=n_threads) as executor:
+            futures = []
+            for film_id in film_ids:
+                futures.append(executor.submit(get_pagination_keys, url=BASE_URL.format(film_id), film_id=film_id))
+            for future in concurrent.futures.as_completed(futures):
+                keys, film_id = future.result()
+                film_id_col.append(film_id)
+                key_list_col.append(keys)
+
+    df = DataFrame({'film_id': film_id_col, 'pkeys': key_list_col})
     df.to_csv(SeleniumConfig.SAVE_TO, index=False)
 

@@ -2,6 +2,9 @@ from scrapy import Spider, Request
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import TakeFirst
 from scrapy import Selector
+from pandas import read_csv
+from ast import literal_eval
+from configs import *
 
 from IMDB_Crawler.items import MovieItem, ReviewItem
 
@@ -65,16 +68,35 @@ class ReviewSpider(Spider):
     allowed_domains = ['imdb.com']
 
     def start_requests(self):
-        base_url = 'https://www.imdb.com/title/tt10048342/reviews/_ajax?ref_=undefined&paginationKey='
-        pagination_key = 'g4wp7czmqy2dcyqk7stxhnryrxs4mazhzfmxvlnomwklyczuf43o6ss5oiyvxnbddz4k4iai23zw7hjnwz3rb5e47shxqca'
-        url = base_url + pagination_key
-        yield Request(url=url, callback=self.parse_review_container)
+
+        base_url = 'https://www.imdb.com/title/{0}/reviews/_ajax?ref_=undefined&paginationKey={1}'
+
+        # for testing
+        # film_id = 'tt10048342'
+        # pagination_key = 'g4wp7czmqy2dcyqk7stxhnryrxs4mazhzfmxvlnomwklyczuf43o6ss5oiyvxnbddz4k4iai23zw7hjnwz3rb5e47shxqca'
+        # url = base_url.format(film_id, pagination_key)
+        # yield Request(url=url, callback=self.parse_review_container)
+
+        df = read_csv('data/review_pagination_keys/pkeys_0_20.csv', converters={'keys': literal_eval})
+        start_idx = ReviewSpiderConfig.START_IDX
+        end_idx = ReviewSpiderConfig.END_IDX
+        df = df.iloc[start_idx:end_idx].reset_index(drop=True)
+        for i in range(len(df)):
+            film_id, pkeys = df.iloc[i]
+            if pkeys is None or len(pkeys) == 0:
+                continue
+
+            for pkey in pkeys:
+                url = base_url.format(film_id, pkey)
+                yield Request(url=url, callback=self.parse_review_container, cb_kwargs=dict(film_id=film_id))
 
     def parse_review_container(self, response, **kwargs):
+        film_id = kwargs['film_id']
         rv_containers = response.xpath('/html/body/div[1]/div[1]/div')
         xpath = '/html/body/div[1]/div[1]/div[{0}]/{1}'
         for idx in range(1, len(rv_containers)+1):
             l = ItemLoader(item=ReviewItem(), response=response)
+            l.add_value('film_id', film_id)
             l.add_xpath('user_id', xpath.format(idx, 'div[1]/div[1]/div[2]/span[1]/a/@href'))
             l.add_xpath('comment_id', xpath.format(idx, 'div[1]/div[1]/a/@href'))
             l.add_xpath('date', xpath.format(idx, 'div[1]/div[1]/div[2]/span[2]/text()'))
