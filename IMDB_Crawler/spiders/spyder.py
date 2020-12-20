@@ -77,7 +77,8 @@ class ReviewSpider(Spider):
         # url = base_url.format(film_id, pagination_key)
         # yield Request(url=url, callback=self.parse_review_container)
 
-        df = read_csv('data/review_pagination_keys/pkeys_0_20.csv', converters={'keys': literal_eval})
+        path = ReviewSpiderConfig.KEYS_PATH
+        df = read_csv(path, converters={'pkeys': literal_eval})
         start_idx = ReviewSpiderConfig.START_IDX
         end_idx = ReviewSpiderConfig.END_IDX
         df = df.iloc[start_idx:end_idx].reset_index(drop=True)

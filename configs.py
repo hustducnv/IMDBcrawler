@@ -1,6 +1,5 @@
 import os
 
-
 BASE_DIR = os.path.dirname(__file__)
 CORE_DATA_DIR = os.path.join(BASE_DIR, 'data')
 
@@ -11,16 +10,22 @@ class ReviewSpiderConfig:
     START_IDX = 0
     END_IDX = 3
 
+
 class SeleniumConfig:
-    OS = 'WINDOWN'  # 'UBUNTU' or 'WINDOWN'
-    if OS == 'WINDOWN':
+    OS_LIST = ['UBUNTU', 'WINDOWNS', 'COLAB']
+    OS_IDX = 1
+    if OS_IDX == 1:
         driver = 'chromedriver.exe'
-    elif OS == 'UBUNTU':
+        CHROME_DRIVER_PATH = os.path.join(CORE_DATA_DIR, 'Chrome', driver)
+    elif OS_IDX == 0:
         driver = 'chromedriver'
+        CHROME_DRIVER_PATH = os.path.join(CORE_DATA_DIR, 'Chrome', driver)
+    elif OS_IDX == 2:
+        CHROME_DRIVER_PATH = '/usr/lib/chromium-browser/chromedriver'
     else:
-        raise Exception('OS wrong! See configs.py')
+        raise Exception('OS_IDX wrong! See configs.py')
     N_THREADS = 4
-    CHROME_DRIVER_PATH = os.path.join(CORE_DATA_DIR, 'Chrome', driver)
+
     MAX_IDX = 10520
     START_IDX = 0
     END_IDX = 10  # EXCLUSIVE

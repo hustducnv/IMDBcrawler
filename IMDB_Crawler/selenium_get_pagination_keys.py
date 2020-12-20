@@ -17,7 +17,13 @@ from configs import *
 
 PATH = SeleniumConfig.CHROME_DRIVER_PATH
 options = webdriver.ChromeOptions()
-options.add_argument('headless')  # options to not open Chrome UI
+# options.add_argument('headless')  # options to not open Chrome UI
+
+# option to run in Colab
+options.add_argument('-headless')
+options.add_argument('-no-sandbox')
+options.add_argument('-disable-dev-shm-usage')
+
 desired_capabilities = options.to_capabilities()
 
 # url_film = 'https://www.imdb.com/title/tt10048342/reviews'
