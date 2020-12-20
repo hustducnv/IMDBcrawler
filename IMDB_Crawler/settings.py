@@ -19,6 +19,7 @@ LOG_LEVEL = 'INFO'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'IMDB_Crawler (+http://www.yourdomain.com)'
 
+
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
