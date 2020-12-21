@@ -11,6 +11,7 @@ from pandas import read_csv, DataFrame
 from tqdm import tqdm
 import numpy as np
 import threading
+import os
 import concurrent.futures
 from configs import *
 
@@ -32,22 +33,24 @@ BASE_URL = 'https://www.imdb.com/title/{}/reviews'
 
 def get_pagination_keys(url, film_id=None):
     driver = webdriver.Chrome(PATH, desired_capabilities=desired_capabilities)
-    driver.get(url)
     pagination_keys = set()
-
     try:
-        div_load_more = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, 'load-more-data'))
-        )
-        load_more_btn = div_load_more.find_element_by_id('load-more-trigger')
-        while load_more_btn.is_displayed():
-            data_key = div_load_more.get_attribute('data-key')
-            # print(data_key)
-            pagination_keys.add(data_key)
-            load_more_btn.click()
-            time.sleep(3)
+        driver.get(url)
+        try:
+            div_load_more = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'load-more-data'))
+            )
+            load_more_btn = div_load_more.find_element_by_id('load-more-trigger')
+            while load_more_btn.is_displayed():
+                data_key = div_load_more.get_attribute('data-key')
+                # print(data_key)
+                pagination_keys.add(data_key)
+                load_more_btn.click()
+                time.sleep(3)
+        except:
+            print('ERROR LOAD MORE --------------', url)
     except:
-        print('ERROR--------------', url)
+        print('ERROR GET URL --------------', url)
     finally:
         driver.quit()
 
@@ -62,7 +65,7 @@ def get_pagination_keys(url, film_id=None):
 
 def run():
     film_ids = read_csv(
-        os.path.join(CORE_DATA_DIR, 'id2020.csv'),
+        os.path.join(CORE_DATA_DIR, 'id_30rvs.csv'),
         header=0,
         dtype={'film_id': str}
     )
@@ -72,6 +75,12 @@ def run():
     start, end = SeleniumConfig.START_IDX, SeleniumConfig.END_IDX
     film_ids = film_ids[start:end]
     n_threads = SeleniumConfig.N_THREADS
+
+    DONE_IDS = None
+    save_to = SeleniumConfig.SAVE_TO
+    if os.path.exists(save_to):
+        tdf = read_csv(save_to, dtype={'film_id': str, 'pkeys': str})
+        DONE_IDS = set(tdf.film_id.values)
 
     print('#' * 50)
     print('N_THREADS = ', n_threads)
@@ -84,6 +93,8 @@ def run():
         with concurrent.futures.ThreadPoolExecutor(max_workers=n_threads) as executor:
             futures = []
             for film_id in film_ids:
+                if DONE_IDS is not None and film_id in DONE_IDS:
+                    continue
                 futures.append(executor.submit(get_pagination_keys, url=BASE_URL.format(film_id), film_id=film_id))
             for future in concurrent.futures.as_completed(futures):
                 keys, film_id = future.result()
@@ -91,5 +102,8 @@ def run():
                 key_list_col.append(keys)
 
     df = DataFrame({'film_id': film_id_col, 'pkeys': key_list_col})
-    df.to_csv(SeleniumConfig.SAVE_TO, index=False)
+    if DONE_IDS is None:
+        df.to_csv(save_to, index=False)
+    else:
+        df.to_csv(save_to, index=False, mode='a', header=None)
 

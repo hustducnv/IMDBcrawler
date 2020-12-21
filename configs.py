@@ -24,9 +24,10 @@ class SeleniumConfig:
         CHROME_DRIVER_PATH = '/usr/lib/chromium-browser/chromedriver'
     else:
         raise Exception('OS_IDX wrong! See configs.py')
-    N_THREADS = 4
 
-    MAX_IDX = 10520
+    N_THREADS = 5
+
+    MAX_IDX = 8701
     START_IDX = 0
-    END_IDX = 10  # EXCLUSIVE
+    END_IDX = 7  # EXCLUSIVE
     SAVE_TO = os.path.join(CORE_DATA_DIR, 'review_pagination_keys', 'pkeys_{0}_{1}.csv'.format(START_IDX, END_IDX))
